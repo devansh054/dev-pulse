@@ -38,10 +38,23 @@ export function useAuth() {
     }
   }
 
-  const signIn = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    window.location.href = `${apiUrl}/api/auth/github`
-  }
+  const handleGitHubLogin = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    
+    // Warm up the backend before OAuth to prevent cold start delays
+    try {
+      await fetch(`${apiUrl}/api/auth/ping`, { 
+        method: 'GET',
+        cache: 'no-cache'
+      });
+      // Small delay to ensure backend is fully warmed up
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.warn('Backend warmup failed, proceeding with OAuth:', error);
+    }
+    
+    window.location.href = `${apiUrl}/api/auth/github`;
+  };
 
   const signOut = async () => {
     try {

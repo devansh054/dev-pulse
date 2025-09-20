@@ -561,12 +561,23 @@ router.get('/logout', async (req, res) => {
   }
 });
 
+// Keep-alive endpoint to prevent cold starts
+router.get('/ping', (req, res) => {
+  res.json({ 
+    success: true, 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // GitHub OAuth entry point
 router.get('/github', (req, res) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const backendUrl = process.env.NODE_ENV === 'production' ? 'https://dev-pulse-api.onrender.com' : 'http://localhost:3001';
   const redirectUri = `${backendUrl}/api/auth/github/callback`;
   const scope = 'user:email,read:user,repo';
+  
+  logger.info('GitHub OAuth initiated', { clientId: clientId?.substring(0, 8) + '...', redirectUri });
   
   // Force GitHub to show account selection by adding prompt parameter
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&prompt=select_account`;
