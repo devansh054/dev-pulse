@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # DevPulse - AI-Powered Developer Intelligence Platform
 
 DevPulse is an intelligent developer companion that provides AI-driven insights, burnout prediction, team collaboration analytics, and personalized productivity recommendations. Unlike basic time trackers like WakaTime, DevPulse offers holistic developer intelligence that combines code quality, productivity, learning velocity, and wellbeing metrics.
