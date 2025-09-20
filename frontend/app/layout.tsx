@@ -25,6 +25,14 @@ export const metadata: Metadata = {
   description:
     "AI-powered developer productivity and wellbeing insights",
   generator: 'v0.app',
+  icons: {
+  icon: [
+    { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+  ],
+  shortcut: '/favicon-32x32.png',
+  apple: '/favicon-32x32.png',
+   },
   openGraph: {
     title: "DevPulse - Developer Intelligence Dashboard",
     description: "AI-powered developer productivity and wellbeing insights",
@@ -64,6 +72,9 @@ export default function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2" />
+        <link rel="shortcut icon" href="/favicon-32x32.png?v=2" />
       </head>
       <body
         className={`${rebelGrotesk.variable} ${robotoMono.variable} antialiased`}
