@@ -9,11 +9,18 @@ class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
     
+    // Get GitHub token and user data from localStorage
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    
     const config: RequestInit = {
       ...options,
       credentials: 'include', // Include cookies for authentication
       headers: {
         'Content-Type': 'application/json',
+        // Send GitHub token and user data in custom headers
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
         ...options.headers,
       },
     }
@@ -250,11 +257,11 @@ class ApiClient {
 
   // Chat API methods
   async getChatConversations() {
-    return this.request('/chat/conversations');
+    return this.request('/api/chat/conversations');
   }
 
   async sendChatMessage(content: string, receiverId: string) {
-    return this.request('/chat/messages', {
+    return this.request('/api/chat/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content, receiverId })
@@ -262,11 +269,11 @@ class ApiClient {
   }
 
   async getConversationMessages(partnerId: string) {
-    return this.request(`/chat/conversations/${partnerId}/messages`);
+    return this.request(`/api/chat/conversations/${partnerId}/messages`);
   }
 
   async updateUserAvatar(avatar: string) {
-    return this.request('/chat/profile/avatar', {
+    return this.request('/api/chat/profile/avatar', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ avatar })
@@ -274,7 +281,7 @@ class ApiClient {
   }
 
   async getOnlineUsers() {
-    return this.request('/chat/users/online');
+    return this.request('/api/chat/users/online');
   }
 
   // Team management
@@ -298,7 +305,7 @@ class ApiClient {
           issues: number
         }>
       }
-    }>('/team/members')
+    }>('/api/team/members')
   }
 
   async addTeamMember(githubUsername: string) {
@@ -307,7 +314,7 @@ class ApiClient {
       data: {
         member: any
       }
-    }>('/team/members', {
+    }>('/api/team/members', {
       method: 'POST',
       body: JSON.stringify({ githubUsername })
     })
@@ -319,7 +326,7 @@ class ApiClient {
       data: {
         deletedMember: any
       }
-    }>(`/team/members/${memberId}`, {
+    }>(`/api/team/members/${memberId}`, {
       method: 'DELETE'
     })
   }
@@ -363,7 +370,7 @@ class ApiClient {
           isActive: boolean
         } | null
       }
-    }>('/focus/stats')
+    }>('/api/focus/stats')
   }
 
   async removeChatUser(userId: string) {
@@ -373,7 +380,7 @@ class ApiClient {
         removedUser: string
         removedMessages: number
       }
-    }>(`/chat/remove-user/${userId}`, {
+    }>(`/api/chat/remove-user/${userId}`, {
       method: 'DELETE'
     })
   }
@@ -608,7 +615,7 @@ class ApiClient {
         warningIssues: number
         infoIssues: number
       }
-    }>('/security/stats')
+    }>('/api/security/stats')
   }
 
   async getSecurityEvents() {
@@ -624,7 +631,7 @@ class ApiClient {
         location: string
         resolved: boolean
       }>
-    }>('/security/events')
+    }>('/api/security/events')
   }
 
   async getVulnerabilities() {
@@ -750,7 +757,8 @@ class ApiClient {
 
 export const apiClient = new ApiClient()
 
-import { GearIcon, BoomIcon } from '@/components/icons';
+import GearIcon from '@/components/icons/gear';
+import BoomIcon from '@/components/icons/boom';
 
 // Data transformation utilities
 export const transformToDashboardStats = (data: any): DashboardStat[] => {
@@ -848,50 +856,98 @@ export const transformChartData = (trends: any[]) => {
 
 // Communications API helper functions
 export const communicationsApi = {
-  getCommunicationStats: () => fetch(`${API_BASE_URL}/communications/stats`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json()),
+  getCommunicationStats: () => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/stats`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      }
+    }).then(res => res.json())
+  },
 
-  getCommunicationChannels: () => fetch(`${API_BASE_URL}/communications/channels`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json()),
+  getCommunicationChannels: () => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/channels`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      }
+    }).then(res => res.json())
+  },
 
-  getCommunicationMessages: () => fetch(`${API_BASE_URL}/communications/messages`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json()),
+  getCommunicationMessages: () => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/messages`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      }
+    }).then(res => res.json())
+  },
 
-  createCommunicationChannel: (channelData: {
+  createChannel: (channelData: {
     name: string;
     type: 'public' | 'private';
     description?: string;
-  }) => fetch(`${API_BASE_URL}/communications/channels`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(channelData)
-  }).then(res => res.json()),
+  }) => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/channels`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      },
+      body: JSON.stringify(channelData)
+    }).then(res => res.json())
+  },
 
   sendMessage: (messageData: {
     channelId: string;
     message: string;
-  }) => fetch(`${API_BASE_URL}/communications/messages`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(messageData)
-  }).then(res => res.json()),
+  }) => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/messages`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      },
+      body: JSON.stringify(messageData)
+    }).then(res => res.json())
+  },
 
-  getCommunicationAnalytics: () => fetch(`${API_BASE_URL}/communications/analytics`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json())
+  getCommunicationAnalytics: () => {
+    const githubToken = localStorage.getItem('devpulse_token')
+    const userData = localStorage.getItem('devpulse_user')
+    return fetch(`${API_BASE_URL}/api/communications/analytics`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(githubToken ? { 'X-GitHub-Token': githubToken } : {}),
+        ...(userData ? { 'X-User-Data': userData } : {}),
+      }
+    }).then(res => res.json())
+  }
 };
 
 // Admin API helper functions

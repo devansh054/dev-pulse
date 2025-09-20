@@ -25,6 +25,14 @@ export const metadata: Metadata = {
   description:
     "AI-powered developer productivity and wellbeing insights",
   generator: 'v0.app',
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: '/favicon-32x32.png',
+    apple: '/favicon-32x32.png',
+  },
   openGraph: {
     title: "DevPulse - Developer Intelligence Dashboard",
     description: "AI-powered developer productivity and wellbeing insights",
