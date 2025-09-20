@@ -65,7 +65,7 @@ export default function UserProfile() {
               {user.name || 'GitHub User'}
             </h3>
             <p className="text-sm text-gray-500">{user.email}</p>
-            {profile?.login && (
+            {profile && profile.login && (
               <div className="flex items-center gap-1 mt-1">
                 <Github className="h-4 w-4 text-gray-400" />
                 <span className="text-sm text-gray-600">@{profile.login}</span>
@@ -102,23 +102,25 @@ export default function UserProfile() {
                 <span>{profile.location}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="h-4 w-4" />
-              <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
-            </div>
+            {profile.created_at && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span>Joined {new Date(profile.created_at).toLocaleDateString()}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-6 text-sm">
             <div>
-              <span className="font-semibold text-gray-900">{profile.public_repos}</span>
+              <span className="font-semibold text-gray-900">{profile.public_repos || 0}</span>
               <span className="text-gray-600 ml-1">repositories</span>
             </div>
             <div>
-              <span className="font-semibold text-gray-900">{profile.followers}</span>
+              <span className="font-semibold text-gray-900">{profile.followers || 0}</span>
               <span className="text-gray-600 ml-1">followers</span>
             </div>
             <div>
-              <span className="font-semibold text-gray-900">{profile.following}</span>
+              <span className="font-semibold text-gray-900">{profile.following || 0}</span>
               <span className="text-gray-600 ml-1">following</span>
             </div>
           </div>
