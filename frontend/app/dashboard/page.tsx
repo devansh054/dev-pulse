@@ -51,7 +51,7 @@ export default function DashboardPage() {
     const isDemoMode = urlParams.get('demo') === 'true';
     
     if (isDemoMode) {
-      console.log('🎭 Demo mode explicitly requested, using mock data');
+      console.log('Dashboard: 🎭 Demo mode explicitly requested, using mock data');
       setIsDemo(true);
       setLoading(false);
       return;
@@ -59,17 +59,33 @@ export default function DashboardPage() {
 
     // Check if user is demo user
     const userStr = localStorage.getItem('devpulse_user');
+    const token = localStorage.getItem('devpulse_token');
+    
+    console.log('Dashboard: Checking authentication...');
+    console.log('Dashboard: User data:', userStr);
+    console.log('Dashboard: Token exists:', !!token);
+    
     if (userStr) {
       const user = JSON.parse(userStr);
+      console.log('Dashboard: Parsed user:', user);
+      
       if (user.id === 'demo-user') {
-        console.log('Demo user detected, using mock data');
+        console.log('Dashboard: Demo user detected, using mock data');
         setIsDemo(true);
         setLoading(false);
         return;
       }
     }
 
+    if (!userStr || !token) {
+      console.log('Dashboard: No user data or token, defaulting to demo mode');
+      setIsDemo(true);
+      setLoading(false);
+      return;
+    }
+
     // Real user - data will be loaded by useGitHubData hook
+    console.log('Dashboard: Real user detected, enabling GitHub data integration');
     setIsDemo(false);
     setLoading(false);
   }, []);
