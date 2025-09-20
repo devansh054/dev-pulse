@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 // Import routes
 import authRoutes from './routes/auth';
 import simpleAuthRoutes from './routes/simple-auth';
+import githubDataRoutes from './routes/github-data';
 import dashboardRouter from './routes/dashboard';
 import githubRoutes from './routes/github';
 import userRoutes from './routes/user';
@@ -148,6 +149,7 @@ app.get('/', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/simple-auth', simpleAuthRoutes);
+app.use('/api/github-data', githubDataRoutes);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/user', userRoutes);
 app.use('/api/github', githubRoutes);

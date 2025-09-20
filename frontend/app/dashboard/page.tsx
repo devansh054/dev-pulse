@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BracketsIcon, GearIcon, BoomIcon } from "@/components/icons";
 import DashboardPageLayout from "@/components/dashboard/layout";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -21,6 +21,7 @@ import FeatureSpotlight from "@/components/onboarding/feature-spotlight";
 import HelpButton from "@/components/onboarding/help-button";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useFocusTime } from "@/hooks/useFocusTime";
+import { useGitHubData } from "@/hooks/useGitHubData";
 
 const mockData = mockDataJson as MockData;
 
@@ -36,6 +37,7 @@ export default function DashboardPage() {
   const { syncMessage } = useSyncStatus();
   const { showTour, startTour, completeTour } = useOnboarding();
   const { totalFocusTime } = useFocusTime();
+  const { repositories, activities, stats: githubStats, loading: githubLoading, error: githubError } = useGitHubData();
   const [stats, setStats] = useState<any[]>([]);
   const [trendData, setTrendData] = useState<any[]>([]);
   const [showFeatureSpotlight, setShowFeatureSpotlight] = useState(true);
@@ -44,66 +46,76 @@ export default function DashboardPage() {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      // Check if demo mode is explicitly requested via URL parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const isDemoMode = urlParams.get('demo') === 'true';
-      
-      if (isDemoMode) {
-        console.log('🎭 Demo mode explicitly requested, using mock data');
+    // Check if demo mode is explicitly requested via URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemoMode = urlParams.get('demo') === 'true';
+    
+    if (isDemoMode) {
+      console.log('🎭 Demo mode explicitly requested, using mock data');
+      setIsDemo(true);
+      setLoading(false);
+      return;
+    }
+
+    // Check if user is demo user
+    const userStr = localStorage.getItem('devpulse_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.id === 'demo-user') {
+        console.log('Demo user detected, using mock data');
         setIsDemo(true);
         setLoading(false);
         return;
       }
+    }
 
-      // Check if user is authenticated by checking session
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-        const sessionResponse = await fetch(`${apiUrl}/api/auth/session`, {
-          credentials: 'include'
-        });
-        const sessionData = await sessionResponse.json();
-        
-        if (!sessionData.user || sessionData.user.id === 'demo-user') {
-          console.log('Demo mode or no authentication, using mock data only');
-          setIsDemo(true);
-          setLoading(false);
-          return;
-        }
-        
-        console.log('Authenticated user detected, fetching real data for:', sessionData.user.login);
-      } catch (error) {
-        console.error('Error checking session:', error);
-        console.log('🎭 Falling back to demo mode due to session error');
-        setIsDemo(true);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const [dashboardResponse, githubResponse] = await Promise.all([
-          apiClient.getDashboardOverview(),
-          apiClient.getGitHubStats()
-        ]);
-
-        if (dashboardResponse.success && githubResponse.success) {
-          setRealData({
-            dashboard: dashboardResponse.data,
-            github: githubResponse.data
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
+    // Real user - data will be loaded by useGitHubData hook
+    setIsDemo(false);
+    setLoading(false);
   }, []);
   
-  // Use real data if available, fallback to mock data
-  const statsToShow = realData ? transformToDashboardStats(realData.github) : mockData.dashboardStats;
+  // Create stats from real GitHub data or use mock data
+  const statsToShow = useMemo(() => {
+    if (isDemo || !githubStats) {
+      return mockData.dashboardStats;
+    }
+
+    // Transform real GitHub stats to dashboard format
+    return [
+      {
+        label: "Focus Time",
+        value: "0h", // Will be updated below
+        description: "+12%",
+        icon: GearIcon,
+        intent: "positive" as const,
+        direction: "up" as const
+      },
+      {
+        label: "Repositories",
+        value: githubStats.totalRepositories.toString(),
+        description: `${githubStats.publicRepos} public`,
+        icon: BoomIcon,
+        intent: "positive" as const,
+        direction: "up" as const
+      },
+      {
+        label: "Total Stars",
+        value: githubStats.totalStars.toString(),
+        description: "across all repos",
+        icon: GearIcon,
+        intent: "positive" as const,
+        direction: "up" as const
+      },
+      {
+        label: "Languages",
+        value: githubStats.topLanguages.length.toString(),
+        description: githubStats.topLanguages[0]?.language || "None",
+        icon: BoomIcon,
+        intent: "positive" as const,
+        direction: "up" as const
+      }
+    ];
+  }, [isDemo, githubStats, mockData.dashboardStats]);
   
   // Update focus time stat with real-time data
   if (statsToShow.length > 0) {
