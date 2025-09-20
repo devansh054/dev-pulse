@@ -62,41 +62,10 @@ export default function Notifications({
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      // Check if we're in demo mode
-      const isDemoMode = document.cookie.includes('demo_mode=true') || 
-                        new URLSearchParams(window.location.search).get('demo') === 'true';
-      
-      if (isDemoMode) {
-        console.log('Demo mode: using mock notifications');
-        setNotifications(mockNotifications);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await apiClient.getUserInsights();
-        if (response.success && response.data?.insights) {
-          // Transform insights to notifications format
-          const transformedNotifications: Notification[] = response.data.insights.map(insight => ({
-            id: insight.id,
-            title: insight.title,
-            description: insight.description,
-            message: insight.description,
-            time: new Date(insight.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: insight.createdAt,
-            read: insight.read,
-            type: insight.type as any,
-            priority: 'medium' as const
-          }));
-          setNotifications(transformedNotifications);
-        }
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-        // Fallback to mock notifications on error
-        setNotifications(mockNotifications);
-      } finally {
-        setLoading(false);
-      }
+      // Always use mock notifications to prevent infinite API calls
+      console.log('Using mock notifications to prevent API loops');
+      setNotifications(mockNotifications);
+      setLoading(false);
     };
 
     if (initialNotifications.length === 0) {

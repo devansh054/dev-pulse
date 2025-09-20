@@ -22,40 +22,14 @@ export function MobileHeader({ mockData }: MobileHeaderProps) {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      // Check if we're in demo mode
-      const isDemoMode = document.cookie.includes('demo_mode=true');
+      // Skip API call to prevent infinite loops
+      console.log('Mobile header: skipping getUserInsights API call to prevent loops');
       
-      if (isDemoMode) {
-        console.log('Demo mode: skipping mobile header notifications API call');
-        return;
+      // Use mock data if available
+      if (mockData) {
+        setNotifications(mockData.notifications);
       }
-
-      try {
-        const response = await apiClient.getUserInsights();
-        if (response.success && response.data?.insights) {
-          // Transform insights to notifications format
-          const transformedNotifications: Notification[] = response.data.insights.map(insight => ({
-            id: insight.id,
-            title: insight.title,
-            description: insight.description,
-            message: insight.description,
-            time: new Date(insight.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: insight.createdAt,
-            read: insight.read,
-            type: insight.type as any,
-            priority: 'medium' as const
-          }));
-          setNotifications(transformedNotifications);
-        }
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-        // Fallback to mock data
-        if (mockData) {
-          setNotifications(mockData.notifications);
-        }
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     };
 
     fetchNotifications();
