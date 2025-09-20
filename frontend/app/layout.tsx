@@ -17,6 +17,7 @@ const rebelGrotesk = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dev-pulse.netlify.app'),
   title: {
     template: "%s – DevPulse",
     default: "DevPulse - Developer Intelligence Dashboard",
