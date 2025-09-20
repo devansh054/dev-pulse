@@ -3,9 +3,7 @@ const nextConfig = {
   output: 'export',
   trailingSlash: true,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://dev-pulse-api.onrender.com' 
-      : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    NEXT_PUBLIC_API_URL: 'https://dev-pulse-api.onrender.com',
   },
   eslint: {
     ignoreDuringBuilds: true,
