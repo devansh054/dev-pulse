@@ -155,35 +155,38 @@ router.get('/github/callback', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Set JWT token as HTTP-only cookie
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
-    });
-
-    // Also set GitHub token and user data for API access
-    res.cookie('github_token', access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
-    });
-
-    res.cookie('user_data', JSON.stringify(githubUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
-    });
-
-    // Redirect to dashboard
+    // For production, redirect with token in URL for static site
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/dashboard`);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // Redirect with token in URL for static site
+      res.redirect(`${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+        name: user.name
+      }))}`);
+    } else {
+      // For development, use cookies
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: 'localhost'
+      });
+      
+      res.cookie('github_token', access_token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: 'localhost'
+      });
+      
+      res.redirect(`${frontendUrl}/dashboard`);
+    }
   } catch (error) {
     logger.error('GitHub OAuth error:', error);
     // Redirect to signin with error
