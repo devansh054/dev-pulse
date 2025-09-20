@@ -6,7 +6,8 @@ import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
 // Import routes
-import authRouter from './routes/auth';
+import authRoutes from './routes/auth';
+import simpleAuthRoutes from './routes/simple-auth';
 import dashboardRouter from './routes/dashboard';
 import githubRoutes from './routes/github';
 import userRoutes from './routes/user';
@@ -139,7 +140,8 @@ app.get('/', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api/simple-auth', simpleAuthRoutes);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/user', userRoutes);
 app.use('/api/github', githubRoutes);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Github, Activity, Shield, BarChart3, Users, Zap, Code2, Star } from 'lucide-react';
 import Link from "next/link";
-import Logo from "@/components/ui/logo";
+import { SimpleAuth } from '@/components/auth/simple-auth';
 import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
@@ -48,7 +48,7 @@ export default function SignIn() {
       <div className="hidden lg:flex lg:w-1/2 bg-black text-white flex-col justify-center px-12">
         <div className="max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <Logo size="lg" />
+            <Activity className="h-8 w-8 text-blue-400" />
             <span className="text-2xl font-bold">DevPulse</span>
           </div>
           
@@ -88,7 +88,7 @@ export default function SignIn() {
           {/* Mobile header */}
           <div className="lg:hidden mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <Logo size="md" />
+              <Activity className="h-6 w-6 text-blue-400" />
               <span className="text-xl font-bold">DevPulse</span>
             </div>
           </div>
@@ -98,38 +98,12 @@ export default function SignIn() {
             <p className="text-gray-600">Sign in to your DevPulse account to continue</p>
           </div>
 
-          {/* GitHub Sign In */}
-          <div className="space-y-4">
-            <button
-              onClick={handleGitHubSignIn}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Github className="h-5 w-5" />
-              )}
-              {isLoading ? 'Connecting...' : 'Continue with GitHub'}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
-              </div>
-            </div>
-
-            <button 
-              onClick={handleDemoMode}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Activity className="h-5 w-5" />
-              Try Demo Mode
-            </button>
-          </div>
+          {/* Simple Auth */}
+          <SimpleAuth 
+            onSuccess={(token, user) => {
+              router.push('/dashboard')
+            }}
+          />
 
           {/* Permissions info */}
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
