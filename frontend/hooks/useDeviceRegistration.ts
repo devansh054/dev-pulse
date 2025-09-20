@@ -163,7 +163,7 @@ export const useDeviceRegistration = () => {
     // Check if we should auto-register (only if user is authenticated)
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
+      const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/session`, {
         credentials: 'include'
       });
       const sessionData = await sessionResponse.json();
