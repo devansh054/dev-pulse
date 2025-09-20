@@ -189,6 +189,15 @@ router.get('/github/callback', async (req, res) => {
     }
   } catch (error) {
     logger.error('GitHub OAuth error:', error);
+    logger.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      code: req.query.code ? 'present' : 'missing',
+      clientId: process.env.GITHUB_CLIENT_ID ? 'present' : 'missing',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ? 'present' : 'missing',
+      jwtSecret: process.env.JWT_SECRET ? 'present' : 'missing',
+      databaseUrl: process.env.DATABASE_URL ? 'present' : 'missing'
+    });
     // Redirect to signin with error
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(`${frontendUrl}/auth/signin?error=auth_failed`);
