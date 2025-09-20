@@ -117,10 +117,10 @@ export class AIInsightsService {
       // Get user's GitHub activity to analyze learning patterns
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { githubUsername: true },
+        select: { username: true },
       });
 
-      if (!user?.githubUsername) {
+      if (!user?.username) {
         return insights;
       }
 

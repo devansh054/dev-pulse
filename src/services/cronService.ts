@@ -43,17 +43,14 @@ export class CronService {
     try {
       const users = await prisma.user.findMany({
         where: {
-          githubAccessToken: {
-            not: null,
-          },
-          githubUsername: {
+          githubId: {
             not: null,
           },
         },
         select: {
           id: true,
-          githubUsername: true,
-          githubAccessToken: true,
+          username: true,
+          githubId: true,
         },
       });
 
@@ -61,8 +58,9 @@ export class CronService {
 
       for (const user of users) {
         try {
-          const githubService = new GitHubService(user.githubAccessToken!);
-          await githubService.syncUserData(user.id, user.githubUsername!);
+          // Skip GitHub sync for now since we don't store access tokens
+          // const githubService = new GitHubService(user.githubAccessToken!);
+          // await githubService.syncUserData(user.id, user.username!);
           
           // Add small delay to avoid rate limiting
           await new Promise(resolve => setTimeout(resolve, 1000));
