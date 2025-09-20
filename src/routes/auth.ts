@@ -327,14 +327,30 @@ router.get('/github/callback', async (req, res) => {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       code: req.query.code ? 'present' : 'missing',
+      codeValue: req.query.code ? String(req.query.code).substring(0, 10) + '...' : 'none',
       clientId: process.env.GITHUB_CLIENT_ID ? 'present' : 'missing',
       clientSecret: process.env.GITHUB_CLIENT_SECRET ? 'present' : 'missing',
       jwtSecret: process.env.JWT_SECRET ? 'present' : 'missing',
-      databaseUrl: process.env.DATABASE_URL ? 'present' : 'missing'
+      databaseUrl: process.env.DATABASE_URL ? 'present' : 'missing',
+      timestamp: new Date().toISOString(),
+      userAgent: req.headers['user-agent'],
+      referer: req.headers['referer']
     });
+    
+    // Log the specific error type for debugging
+    if (axios.isAxiosError(error)) {
+      logger.error('Axios error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+    }
+    
     // Redirect to signin with error
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/signin?error=auth_failed`);
+    res.redirect(`${frontendUrl}/auth/signin?error=oauth_callback_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
   }
 });
 
