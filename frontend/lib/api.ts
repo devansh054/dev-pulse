@@ -750,7 +750,8 @@ class ApiClient {
 
 export const apiClient = new ApiClient()
 
-import { GearIcon, BoomIcon } from '@/components/icons';
+import GearIcon from '@/components/icons/gear';
+import BoomIcon from '@/components/icons/boom';
 
 // Data transformation utilities
 export const transformToDashboardStats = (data: any): DashboardStat[] => {
