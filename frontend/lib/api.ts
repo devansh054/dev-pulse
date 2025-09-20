@@ -537,7 +537,7 @@ class ApiClient {
           storageUsage?: number
         }>
       }
-    }>('/devices')
+    }>('/api/devices')
   }
 
   async getDeviceStats() {
@@ -551,7 +551,7 @@ class ApiClient {
         averageMemoryUsage: number
         totalMemoryUsage: number
       }
-    }>('/devices/stats')
+    }>('/api/devices/stats')
   }
 
   async addDevice(data: {
@@ -563,7 +563,7 @@ class ApiClient {
     return this.request<{
       success: boolean
       data: { device: any }
-    }>('/devices', {
+    }>('/api/devices', {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -579,7 +579,7 @@ class ApiClient {
     return this.request<{
       success: boolean
       data: { device: any }
-    }>(`/devices/${id}`, {
+    }>(`/api/devices/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     })
@@ -589,7 +589,7 @@ class ApiClient {
     return this.request<{
       success: boolean
       data: { message: string }
-    }>(`/devices/${id}`, {
+    }>(`/api/devices/${id}`, {
       method: 'DELETE'
     })
   }
