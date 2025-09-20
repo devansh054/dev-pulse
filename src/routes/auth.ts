@@ -305,20 +305,18 @@ router.get('/github/callback', async (req, res) => {
       }))}`);
     } else {
       // For development, use cookies
-      res.cookie('auth_token', token, {
+      res.cookie('token', token, {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: 'localhost'
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
       
       res.cookie('github_token', access_token, {
         httpOnly: true,
         secure: false,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: 'localhost'
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
       
       res.redirect(`${frontendUrl}/dashboard`);
