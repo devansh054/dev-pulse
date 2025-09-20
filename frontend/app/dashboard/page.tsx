@@ -46,6 +46,8 @@ export default function DashboardPage() {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
+    console.log('Dashboard: useEffect running - checking authentication');
+    
     // Check if demo mode is explicitly requested via URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const isDemoMode = urlParams.get('demo') === 'true';
