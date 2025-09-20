@@ -51,9 +51,24 @@ router.get('/test-env', async (req, res) => {
 // GitHub OAuth callback
 router.get('/github/callback', async (req, res) => {
   try {
-    const { code } = req.query;
+    const { code, error: oauthError, error_description } = req.query;
+
+    // Log the callback request for debugging
+    logger.info('OAuth callback received:', {
+      code: code ? 'present' : 'missing',
+      error: oauthError,
+      error_description,
+      query: req.query
+    });
+
+    if (oauthError) {
+      logger.error('OAuth error from GitHub:', { error: oauthError, description: error_description });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/signin?error=oauth_${oauthError}`);
+    }
 
     if (!code) {
+      logger.error('No authorization code provided');
       return res.status(400).json({
         success: false,
         error: 'Authorization code is required',
