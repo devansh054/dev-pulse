@@ -47,6 +47,8 @@ export function useGitHubData() {
 
   const apiCall = async (endpoint: string, params?: Record<string, string>) => {
     const token = localStorage.getItem('devpulse_token')
+    console.log('useGitHubData: Retrieved token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null')
+    
     if (!token) {
       throw new Error('No authentication token found')
     }
@@ -60,6 +62,9 @@ export function useGitHubData() {
       })
     }
 
+    console.log('useGitHubData: Making API call to:', url.toString())
+    console.log('useGitHubData: With headers:', { 'Authorization': `Bearer ${token.substring(0, 20)}...` })
+
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -67,11 +72,17 @@ export function useGitHubData() {
       }
     })
 
+    console.log('useGitHubData: API response status:', response.status)
+
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.statusText}`)
+      const errorText = await response.text()
+      console.log('useGitHubData: API error response:', errorText)
+      throw new Error(`API call failed: ${response.statusText} - ${errorText}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    console.log('useGitHubData: API response data:', data)
+    return data
   }
 
   const fetchRepositories = async () => {
