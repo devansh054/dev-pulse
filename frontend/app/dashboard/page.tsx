@@ -32,7 +32,7 @@ const iconMap = {
 };
 
 export default function DashboardPage() {
-  console.log("🏠 DashboardPage component rendering");
+  console.log("🏠 DashboardPage component rendering - VERSION 2.0");
   
   const { syncMessage } = useSyncStatus();
   const { showTour, startTour, completeTour } = useOnboarding();
