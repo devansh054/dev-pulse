@@ -73,3 +73,5 @@ prisma/migrations/
 coverage/
 .jest/
 dist/
+.env.production
+cookies.txt
