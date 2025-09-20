@@ -7,6 +7,47 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 
 const router = express.Router();
 
+// Test endpoint to verify environment variables
+router.get('/test-env', async (req, res) => {
+  try {
+    // Test database connection
+    const userCount = await prisma.user.count();
+    
+    res.json({
+      success: true,
+      env: {
+        nodeEnv: process.env.NODE_ENV,
+        hasGithubClientId: !!process.env.GITHUB_CLIENT_ID,
+        hasGithubClientSecret: !!process.env.GITHUB_CLIENT_SECRET,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        frontendUrl: process.env.FRONTEND_URL,
+        githubClientId: process.env.GITHUB_CLIENT_ID?.substring(0, 8) + '...',
+      },
+      database: {
+        connected: true,
+        userCount
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      env: {
+        nodeEnv: process.env.NODE_ENV,
+        hasGithubClientId: !!process.env.GITHUB_CLIENT_ID,
+        hasGithubClientSecret: !!process.env.GITHUB_CLIENT_SECRET,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        frontendUrl: process.env.FRONTEND_URL,
+      },
+      database: {
+        connected: false
+      }
+    });
+  }
+});
+
 // GitHub OAuth callback
 router.get('/github/callback', async (req, res) => {
   try {
