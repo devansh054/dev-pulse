@@ -28,10 +28,13 @@ const getGitHubToken = (req: express.Request, res: express.Response, next: expre
 // Get user's repositories
 router.get('/repositories', getGitHubToken, async (req, res) => {
   try {
+    logger.info('Fetching repositories with token:', req.githubToken?.substring(0, 10) + '...');
+    
     const response = await axios.get('https://api.github.com/user/repos', {
       headers: {
-        Authorization: `Bearer ${req.githubToken}`,
-        'User-Agent': 'DevPulse-App'
+        Authorization: `token ${req.githubToken}`,
+        'User-Agent': 'DevPulse-App',
+        'Accept': 'application/vnd.github.v3+json'
       },
       params: {
         sort: 'updated',
@@ -55,9 +58,9 @@ router.get('/repositories', getGitHubToken, async (req, res) => {
     }));
 
     res.json({ repositories: repos });
-  } catch (error) {
-    logger.error('Failed to fetch repositories:', error);
-    res.status(500).json({ error: 'Failed to fetch repositories' });
+  } catch (error: any) {
+    logger.error('Failed to fetch repositories:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch repositories', details: error.response?.data || error.message });
   }
 });
 
@@ -71,8 +74,9 @@ router.get('/activity', getGitHubToken, async (req, res) => {
 
     const response = await axios.get(`https://api.github.com/users/${username}/events/public`, {
       headers: {
-        Authorization: `Bearer ${req.githubToken}`,
-        'User-Agent': 'DevPulse-App'
+        Authorization: `token ${req.githubToken}`,
+        'User-Agent': 'DevPulse-App',
+        'Accept': 'application/vnd.github.v3+json'
       },
       params: {
         per_page: 30
@@ -93,9 +97,9 @@ router.get('/activity', getGitHubToken, async (req, res) => {
     }));
 
     res.json({ activities });
-  } catch (error) {
-    logger.error('Failed to fetch activity:', error);
-    res.status(500).json({ error: 'Failed to fetch activity' });
+  } catch (error: any) {
+    logger.error('Failed to fetch activity:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch activity', details: error.response?.data || error.message });
   }
 });
 
@@ -105,8 +109,9 @@ router.get('/commits/:owner/:repo', getGitHubToken, async (req, res) => {
     const { owner, repo } = req.params;
     const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
       headers: {
-        Authorization: `Bearer ${req.githubToken}`,
-        'User-Agent': 'DevPulse-App'
+        Authorization: `token ${req.githubToken}`,
+        'User-Agent': 'DevPulse-App',
+        'Accept': 'application/vnd.github.v3+json'
       },
       params: {
         per_page: 20
@@ -122,9 +127,9 @@ router.get('/commits/:owner/:repo', getGitHubToken, async (req, res) => {
     }));
 
     res.json({ commits });
-  } catch (error) {
-    logger.error('Failed to fetch commits:', error);
-    res.status(500).json({ error: 'Failed to fetch commits' });
+  } catch (error: any) {
+    logger.error('Failed to fetch commits:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch commits', details: error.response?.data || error.message });
   }
 });
 
@@ -139,8 +144,9 @@ router.get('/stats', getGitHubToken, async (req, res) => {
     // Get user's repositories for stats calculation
     const reposResponse = await axios.get('https://api.github.com/user/repos', {
       headers: {
-        Authorization: `Bearer ${req.githubToken}`,
-        'User-Agent': 'DevPulse-App'
+        Authorization: `token ${req.githubToken}`,
+        'User-Agent': 'DevPulse-App',
+        'Accept': 'application/vnd.github.v3+json'
       },
       params: {
         per_page: 100,
@@ -171,9 +177,9 @@ router.get('/stats', getGitHubToken, async (req, res) => {
     };
 
     res.json({ stats });
-  } catch (error) {
-    logger.error('Failed to fetch stats:', error);
-    res.status(500).json({ error: 'Failed to fetch stats' });
+  } catch (error: any) {
+    logger.error('Failed to fetch stats:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch stats', details: error.response?.data || error.message });
   }
 });
 

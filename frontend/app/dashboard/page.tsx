@@ -76,9 +76,14 @@ export default function DashboardPage() {
   
   // Create stats from real GitHub data or use mock data
   const statsToShow = useMemo(() => {
+    console.log('Dashboard: isDemo =', isDemo, 'githubStats =', githubStats, 'githubLoading =', githubLoading, 'githubError =', githubError);
+    
     if (isDemo || !githubStats) {
+      console.log('Dashboard: Using mock data');
       return mockData.dashboardStats;
     }
+
+    console.log('Dashboard: Using real GitHub stats:', githubStats);
 
     // Transform real GitHub stats to dashboard format
     return [
