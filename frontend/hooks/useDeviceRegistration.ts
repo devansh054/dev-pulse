@@ -132,7 +132,8 @@ export const useDeviceRegistration = () => {
         storageUsage: metrics.storageUsage,
       };
 
-      const response = await fetch('http://localhost:3001/api/devices', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/devices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +162,8 @@ export const useDeviceRegistration = () => {
     
     // Check if we should auto-register (only if user is authenticated)
     try {
-      const sessionResponse = await fetch('http://localhost:3001/api/auth/session', {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
         credentials: 'include'
       });
       const sessionData = await sessionResponse.json();

@@ -23,7 +23,8 @@ export function useAuth() {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/session', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/auth/session`, {
         credentials: 'include'
       })
       const data = await response.json()
@@ -38,12 +39,14 @@ export function useAuth() {
   }
 
   const signIn = () => {
-    window.location.href = 'http://localhost:3001/api/auth/github'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    window.location.href = `${apiUrl}/api/auth/github`
   }
 
   const signOut = async () => {
     try {
-      await fetch('http://localhost:3001/api/auth/session', { 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      await fetch(`${apiUrl}/api/auth/session`, { 
         method: 'DELETE',
         credentials: 'include'
       })

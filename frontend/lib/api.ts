@@ -26,7 +26,8 @@ class ApiClient {
       if (response.status === 401) {
         console.log('🔐 Authentication required, redirecting to GitHub OAuth');
         // Redirect to GitHub OAuth on authentication failure
-        window.location.href = 'http://localhost:3001/api/auth/github'
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        window.location.href = `${apiUrl}/api/auth/github`
         throw new Error('Authentication required')
       }
       throw new Error(`HTTP error! status: ${response.status}`)

@@ -23,7 +23,8 @@ interface OpenWeatherResponse {
 export class WeatherService {
   static async getTorontoWeather(): Promise<WeatherData> {
     try {
-      const response = await fetch('http://localhost:3001/api/weather/toronto', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/weather/toronto`, {
         credentials: 'include'
       });
       

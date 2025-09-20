@@ -34,7 +34,8 @@ export default function AIInsightsCard() {
 
       // Check if user is authenticated by checking session
       try {
-        const sessionResponse = await fetch('http://localhost:3001/api/auth/session', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        const sessionResponse = await fetch(`${apiUrl}/api/auth/session`, {
           credentials: 'include'
         });
         const sessionData = await sessionResponse.json();
