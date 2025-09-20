@@ -47,7 +47,7 @@ router.post('/github-token', async (req, res) => {
 
     // Create or update user in database
     const user = await prisma.user.upsert({
-      where: { githubId: githubUser.id.toString() },
+      where: { githubId: githubUser.id },
       update: {
         email: primaryEmail,
         username: githubUser.login,
@@ -56,7 +56,7 @@ router.post('/github-token', async (req, res) => {
         updatedAt: new Date()
       },
       create: {
-        githubId: githubUser.id.toString(),
+        githubId: githubUser.id,
         email: primaryEmail,
         username: githubUser.login,
         avatarUrl: githubUser.avatar_url,
@@ -115,7 +115,7 @@ router.post('/demo-user', async (req, res) => {
   try {
     // Create a demo user with fake GitHub data
     const demoUser = await prisma.user.upsert({
-      where: { githubId: 'demo-user-123' },
+      where: { githubId: 999999999 },
       update: {
         email: 'demo@devpulse.app',
         username: 'demo-user',
@@ -124,7 +124,7 @@ router.post('/demo-user', async (req, res) => {
         updatedAt: new Date()
       },
       create: {
-        githubId: 'demo-user-123',
+        githubId: 999999999,
         email: 'demo@devpulse.app',
         username: 'demo-user',
         avatarUrl: 'https://github.com/github.png',
