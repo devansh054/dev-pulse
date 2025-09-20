@@ -43,45 +43,69 @@ router.get('/test-oauth', async (req, res) => {
   }
 });
 
-// Test endpoint to verify environment variables
-router.get('/test-env', async (req, res) => {
+// Keep-alive endpoint to prevent cold starts
+router.get('/ping', (req, res) => {
   try {
-    // Test database connection
-    const userCount = await prisma.user.count();
-    
     res.json({
       success: true,
-      env: {
-        nodeEnv: process.env.NODE_ENV,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: {
         hasGithubClientId: !!process.env.GITHUB_CLIENT_ID,
         hasGithubClientSecret: !!process.env.GITHUB_CLIENT_SECRET,
-        hasJwtSecret: !!process.env.JWT_SECRET,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        frontendUrl: process.env.FRONTEND_URL,
-        githubClientId: process.env.GITHUB_CLIENT_ID?.substring(0, 8) + '...',
+        hasFrontendUrl: !!process.env.FRONTEND_URL,
+        frontendUrl: process.env.FRONTEND_URL
       },
       database: {
-        connected: true,
-        userCount
+        connected: false
       }
     });
   } catch (error) {
-    res.json({
+    logger.error('Ping endpoint error:', error);
+    res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      env: {
-        nodeEnv: process.env.NODE_ENV,
+      error: 'Internal server error',
+      environment: {
         hasGithubClientId: !!process.env.GITHUB_CLIENT_ID,
         hasGithubClientSecret: !!process.env.GITHUB_CLIENT_SECRET,
-        hasJwtSecret: !!process.env.JWT_SECRET,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        frontendUrl: process.env.FRONTEND_URL,
+        hasFrontendUrl: !!process.env.FRONTEND_URL,
+        frontendUrl: process.env.FRONTEND_URL
       },
       database: {
         connected: false
       }
     });
   }
+});
+
+// OAuth debug endpoint
+router.get('/debug', (req, res) => {
+  const { code } = req.query;
+  
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    environment: {
+      GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID?.substring(0, 8) + '...',
+      GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'NOT_SET',
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      NODE_ENV: process.env.NODE_ENV
+    },
+    request: {
+      hasCode: !!code,
+      codeLength: code ? String(code).length : 0,
+      query: req.query,
+      headers: {
+        'user-agent': req.headers['user-agent'],
+        'referer': req.headers['referer'],
+        'host': req.headers['host']
+      }
+    },
+    oauth: {
+      expectedCallbackUrl: 'https://dev-pulse-api.onrender.com/api/auth/github/callback',
+      githubAuthUrl: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=https://dev-pulse-api.onrender.com/api/auth/github/callback&scope=user:email,read:user,repo`
+    }
+  });
 });
 
 // GitHub OAuth callback
