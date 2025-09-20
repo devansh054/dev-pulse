@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  githubId          Int?     @unique
+  username          String
+  email             String?
+  name              String?
+  avatarUrl         String?
+  bio               String?
+  location          String?
+  company           String?
+  blog              String?
+  twitterUsername   String?
+  publicRepos       Int?
+  publicGists       Int?
+  followers         Int?
+  following         Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt @default(now())
+  lastLoginAt       DateTime?
+  
+  // Relations
+  teamMembers       TeamMember[]
+  dailyMetrics      DailyMetric[]
+  experiments       Experiment[]
+  devices           Device[]
+  goals             Goal[]
+  insights          Insight[]
+  projects          Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String
+  description String?
+  githubRepo  String?  @map("github_repo")
+  language    String?
+  status      String   @default("active")
+  isPrivate   Boolean  @default(false) @map("is_private")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model DailyMetric {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @map("user_id")
+  date                  DateTime @db.Date
+  commitsCount          Int      @default(0) @map("commits_count")
+  prsOpened             Int      @default(0) @map("prs_opened")
+  prsReviewed           Int      @default(0) @map("prs_reviewed")
+  issuesClosed          Int      @default(0) @map("issues_closed")
+  linesAdded            Int      @default(0) @map("lines_added")
+  linesRemoved          Int      @default(0) @map("lines_removed")
+  codingTimeMinutes     Int      @default(0) @map("coding_time_minutes")
+  focusTimeMinutes      Int      @default(0) @map("focus_time_minutes")
+  meetingTimeMinutes    Int      @default(0) @map("meeting_time_minutes")
+  lateNightCommits      Int      @default(0) @map("late_night_commits")
+  weekendWork           Boolean  @default(false) @map("weekend_work")
+  productivityScore     Float?   @map("productivity_score")
+  stressLevel           Float?   @map("stress_level")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("daily_metrics")
+}
+
+model Goal {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  title        String
+  description  String?
+  category     String   // 'productivity', 'learning', 'health', 'collaboration'
+  targetValue  Int      @map("target_value")
+  currentValue Int      @default(0) @map("current_value")
+  unit         String   // 'commits', 'hours', 'prs', 'skills'
+  targetDate   DateTime @map("target_date")
+  completed    Boolean  @default(false)
+  priority     String   @default("medium") // 'low', 'medium', 'high'
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+model Insight {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  type        String   // 'productivity', 'burnout', 'learning', 'collaboration'
+  title       String
+  description String
+  impact      String   // 'low', 'medium', 'high'
+  actionable  Boolean  @default(true)
+  data        Json?    // Store additional insight data
+  isRead      Boolean  @default(false) @map("is_read")
+  createdAt   DateTime @default(now()) @map("created_at")
+  expiresAt   DateTime? @map("expires_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("insights")
+}
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  slug        String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  members TeamMember[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id     Int    @id @default(autoincrement())
+  teamId Int    @map("team_id")
+  userId Int    @map("user_id")
+  role   String @default("member") // 'admin', 'manager', 'member'
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  // Relations
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamMemberProfile {
+  id              Int      @id @default(autoincrement())
+  ownerId         Int      @map("owner_id") // User who added this team member
+  githubUsername  String   @map("github_username")
+  name            String
+  avatar          String
+  bio             String?
+  location        String?
+  publicRepos     Int      @default(0) @map("public_repos")
+  followers       Int      @default(0)
+  following       Int      @default(0)
+  commits         Int      @default(0)
+  pullRequests    Int      @default(0) @map("pull_requests")
+  issues          Int      @default(0)
+  joinedAt        DateTime @default(now()) @map("joined_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([ownerId, githubUsername])
+  @@map("team_member_profiles")
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  type      String   // 'commit', 'pr_opened', 'pr_merged', 'issue_created', etc.
+  title     String
+  description String?
+  metadata  Json?    // Store additional activity data
+  repoName  String?  @map("repo_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("activity_logs")
+}
+
+model Experiment {
+  id                  String   @id @default(cuid())
+  userId              Int      @map("user_id")
+  name                String
+  description         String?
+  type                String   // 'performance', 'feature', 'optimization', 'security'
+  status              String   @default("pending") // 'pending', 'running', 'completed', 'failed', 'cancelled'
+  progress            Int      @default(0) // 0-100 percentage
+  priority            String   @default("medium") // 'low', 'medium', 'high', 'critical'
+  startDate           DateTime? @map("start_date")
+  endDate             DateTime? @map("end_date")
+  estimatedDuration   Int?     @map("estimated_duration") // in hours
+  actualDuration      Int?     @map("actual_duration") // in hours
+  tags                String[] // Array of tags for categorization
+  configuration       Json?    // Experiment configuration and parameters
+  results             Json?    // Experiment results and metrics
+  notes               String?  // Additional notes and observations
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  benchmarks ExperimentBenchmark[]
+  testRuns   ExperimentTestRun[]
+
+  @@map("experiments")
+}
+
+model ExperimentBenchmark {
+  id           String   @id @default(cuid())
+  experimentId String   @map("experiment_id")
+  name         String
+  metric       String   // 'response_time', 'memory_usage', 'cpu_usage', 'throughput'
+  value        Float
+  unit         String   // 'ms', 'mb', 'percent', 'requests_per_second'
+  baseline     Float?   // Baseline value for comparison
+  improvement  Float?   // Percentage improvement over baseline
+  timestamp    DateTime @default(now())
+  metadata     Json?    // Additional benchmark data
+
+  // Relations
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@map("experiment_benchmarks")
+}
+
+model ExperimentTestRun {
+  id           String   @id @default(cuid())
+  experimentId String
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  
+  name         String
+  status       String   // 'running', 'completed', 'failed'
+  startTime    DateTime
+  endTime      DateTime?
+  duration     Int?     // in milliseconds
+  results      Json?    // Test results data
+  logs         String?  // Test execution logs
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+
+  @@map("experiment_test_runs")
+}
+
+model Device {
+  id            String   @id @default(cuid())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name          String
+  type          String   // 'laptop', 'desktop', 'server', 'tablet', 'mobile'
+  status        String   @default("offline") // 'online', 'offline', 'maintenance'
+  
+  // System specs
+  specs         Json?    // Hardware specifications
+  
+  // Current metrics
+  cpuUsage      Float?   // Percentage
+  memoryUsage   Float?   // MB
+  storageUsage  Float?   // Percentage
+  
+  // Location and network
+  location      String?
+  ipAddress     String?
+  
+  // Timestamps
+  lastSeen      DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  deviceMetrics DeviceMetric[]
+
+  @@map("devices")
+}
+
+model DeviceMetric {
+  id         String   @id @default(cuid())
+  deviceId   String
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  timestamp  DateTime @default(now())
+  cpuUsage   Float?
+  memoryUsage Float?
+  storageUsage Float?
+  networkIn  Float?   // MB/s
+  networkOut Float?   // MB/s
+  temperature Float?  // Celsius
+  
+  @@map("device_metrics")
+}
