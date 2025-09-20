@@ -7,6 +7,42 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 
 const router = express.Router();
 
+// Test GitHub OAuth configuration
+router.get('/test-oauth', async (req, res) => {
+  try {
+    // Test with a fake code to see GitHub's response
+    const testResponse = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code: 'test_invalid_code_12345',
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    res.json({
+      success: true,
+      githubResponse: testResponse.data,
+      config: {
+        clientId: process.env.GITHUB_CLIENT_ID?.substring(0, 8) + '...',
+        hasClientSecret: !!process.env.GITHUB_CLIENT_SECRET,
+        redirectUri: `${process.env.NODE_ENV === 'production' ? 'https://dev-pulse-api.onrender.com' : 'http://localhost:3001'}/api/auth/github/callback`
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      githubError: axios.isAxiosError(error) ? error.response?.data : undefined
+    });
+  }
+});
+
 // Test endpoint to verify environment variables
 router.get('/test-env', async (req, res) => {
   try {
