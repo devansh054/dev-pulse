@@ -57,6 +57,7 @@ app.use(cors({
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://dev-pulse.netlify.app',
     'https://dev-pulse1.netlify.app',
+    'https://pulse-dev.netlify.app',
     'http://localhost:3002',
     'http://localhost:3001'
   ],
