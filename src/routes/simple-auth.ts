@@ -1,7 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
-import { prisma } from '../app';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -45,24 +44,15 @@ router.post('/github-token', async (req, res) => {
       }
     }
 
-    // Create or update user in database
-    const user = await prisma.user.upsert({
-      where: { githubId: githubUser.id },
-      update: {
-        email: primaryEmail,
-        username: githubUser.login,
-        avatarUrl: githubUser.avatar_url,
-        name: githubUser.name,
-        updatedAt: new Date()
-      },
-      create: {
-        githubId: githubUser.id,
-        email: primaryEmail,
-        username: githubUser.login,
-        avatarUrl: githubUser.avatar_url,
-        name: githubUser.name,
-      }
-    });
+    // Create user object without database (temporary fix)
+    const user = {
+      id: githubUser.id,
+      githubId: githubUser.id,
+      email: primaryEmail,
+      username: githubUser.login,
+      avatarUrl: githubUser.avatar_url,
+      name: githubUser.name
+    };
 
     // Generate JWT token
     const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key';
@@ -113,24 +103,15 @@ router.post('/github-token', async (req, res) => {
 // Quick demo user creation (for immediate testing)
 router.post('/demo-user', async (req, res) => {
   try {
-    // Create a demo user with fake GitHub data
-    const demoUser = await prisma.user.upsert({
-      where: { githubId: 999999999 },
-      update: {
-        email: 'demo@devpulse.app',
-        username: 'demo-user',
-        avatarUrl: 'https://github.com/github.png',
-        name: 'Demo User',
-        updatedAt: new Date()
-      },
-      create: {
-        githubId: 999999999,
-        email: 'demo@devpulse.app',
-        username: 'demo-user',
-        avatarUrl: 'https://github.com/github.png',
-        name: 'Demo User'
-      }
-    });
+    // Create demo user object without database (temporary fix)
+    const demoUser = {
+      id: 999999999,
+      githubId: 999999999,
+      email: 'demo@devpulse.app',
+      username: 'demo-user',
+      avatarUrl: 'https://github.com/github.png',
+      name: 'Demo User'
+    };
 
     const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key';
     const token = jwt.sign(
