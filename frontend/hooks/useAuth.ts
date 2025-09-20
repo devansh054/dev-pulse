@@ -74,7 +74,7 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated: !!user,
-    signIn,
+    signIn: handleGitHubLogin,
     signOut
   }
 }
