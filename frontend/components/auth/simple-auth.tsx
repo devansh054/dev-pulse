@@ -39,6 +39,7 @@ export function SimpleAuth({ onSuccess }: SimpleAuthProps) {
       if (data.success) {
         localStorage.setItem('devpulse_token', data.token)
         localStorage.setItem('devpulse_user', JSON.stringify(data.user))
+        localStorage.setItem('github_token', githubToken)
         onSuccess(data.token, data.user)
       } else {
         setError(data.error || 'Authentication failed')
