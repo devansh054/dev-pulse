@@ -37,13 +37,17 @@ export default function DashboardPage() {
   const { syncMessage } = useSyncStatus();
   const { showTour, startTour, completeTour } = useOnboarding();
   const { totalFocusTime } = useFocusTime();
-  const { repositories, activities, stats: githubStats, loading: githubLoading, error: githubError } = useGitHubData();
   const [stats, setStats] = useState<any[]>([]);
   const [trendData, setTrendData] = useState<any[]>([]);
   const [showFeatureSpotlight, setShowFeatureSpotlight] = useState(true);
   const [realData, setRealData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [isDemo, setIsDemo] = useState(true); // Default to demo mode
+  
+  // Conditionally use GitHub data hook only for authenticated users
+  const shouldFetchGitHubData = !isDemo && typeof window !== 'undefined' && localStorage.getItem('devpulse_token');
+  console.log('Dashboard: shouldFetchGitHubData =', shouldFetchGitHubData, 'isDemo =', isDemo);
+  const { repositories, activities, stats: githubStats, loading: githubLoading, error: githubError } = shouldFetchGitHubData ? useGitHubData() : { repositories: [], activities: [], stats: null, loading: false, error: null };
 
   useEffect(() => {
     console.log('Dashboard: useEffect running - checking authentication');
