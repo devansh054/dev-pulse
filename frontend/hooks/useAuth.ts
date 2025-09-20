@@ -23,6 +23,19 @@ export function useAuth() {
 
   const checkSession = async () => {
     try {
+      // First check localStorage for simple-auth token
+      const token = localStorage.getItem('devpulse_token')
+      const userStr = localStorage.getItem('devpulse_user')
+      
+      if (token && userStr) {
+        const user = JSON.parse(userStr)
+        console.log('useAuth: Found localStorage user:', user)
+        setUser(user)
+        setIsLoading(false)
+        return
+      }
+
+      // Fallback to old session check
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
       const response = await fetch(`${apiUrl}/api/auth/session`, {
         credentials: 'include'
@@ -58,6 +71,11 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
+      // Clear localStorage tokens
+      localStorage.removeItem('devpulse_token')
+      localStorage.removeItem('devpulse_user')
+      
+      // Also clear old session
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
       await fetch(`${apiUrl}/api/auth/session`, { 
         method: 'DELETE',
