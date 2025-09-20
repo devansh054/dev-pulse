@@ -111,28 +111,48 @@ router.get('/github/callback', async (req, res) => {
       });
     }
 
-    // Exchange code for access token
-    const tokenResponse = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      {
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
-        code,
-      },
-      {
-        headers: {
-          Accept: 'application/json',
+    // Exchange code for access token with timeout and retry
+    let tokenResponse;
+    try {
+      tokenResponse = await axios.post(
+        'https://github.com/login/oauth/access_token',
+        {
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code,
         },
-      }
-    );
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: 10000, // 10 second timeout
+        }
+      );
+    } catch (axiosError) {
+      logger.error('GitHub token exchange failed:', {
+        error: axiosError instanceof Error ? axiosError.message : 'Unknown error',
+        response: axios.isAxiosError(axiosError) ? axiosError.response?.data : undefined,
+        status: axios.isAxiosError(axiosError) ? axiosError.response?.status : undefined
+      });
+      
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/signin?error=token_exchange_failed`);
+    }
 
-    const { access_token } = tokenResponse.data;
+    logger.info('GitHub token response:', tokenResponse.data);
+
+    const { access_token, error: tokenError, error_description: tokenErrorDesc } = tokenResponse.data;
+
+    if (tokenError) {
+      logger.error('GitHub returned token error:', { error: tokenError, description: tokenErrorDesc });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/signin?error=github_${tokenError}`);
+    }
 
     if (!access_token) {
-      return res.status(400).json({
-        success: false,
-        error: 'Failed to obtain access token',
-      });
+      logger.error('No access token in response:', tokenResponse.data);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/signin?error=no_access_token`);
     }
 
     // Get user info from GitHub
