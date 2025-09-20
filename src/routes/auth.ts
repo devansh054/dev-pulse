@@ -161,7 +161,7 @@ router.get('/github/callback', async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: 'localhost'
+      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
     });
 
     // Also set GitHub token and user data for API access
@@ -170,7 +170,7 @@ router.get('/github/callback', async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: 'localhost'
+      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
     });
 
     res.cookie('user_data', JSON.stringify(githubUser), {
@@ -178,15 +178,17 @@ router.get('/github/callback', async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: 'localhost'
+      domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost'
     });
 
     // Redirect to dashboard
-    res.redirect('http://localhost:3000/dashboard');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/dashboard`);
   } catch (error) {
     logger.error('GitHub OAuth error:', error);
     // Redirect to signin with error
-    res.redirect('http://localhost:3000/auth/signin?error=auth_failed');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/signin?error=auth_failed`);
   }
 });
 
@@ -398,9 +400,10 @@ router.get('/session', async (req, res) => {
 router.delete('/session', async (req, res) => {
   try {
     // Clear all authentication cookies
-    res.clearCookie('auth_token', { domain: 'localhost' });
-    res.clearCookie('github_token', { domain: 'localhost' });
-    res.clearCookie('user_data', { domain: 'localhost' });
+    const domain = process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost';
+    res.clearCookie('auth_token', { domain });
+    res.clearCookie('github_token', { domain });
+    res.clearCookie('user_data', { domain });
     
     res.json({
       success: true,
@@ -419,22 +422,26 @@ router.delete('/session', async (req, res) => {
 router.get('/logout', async (req, res) => {
   try {
     // Clear all authentication cookies
-    res.clearCookie('auth_token', { domain: 'localhost' });
-    res.clearCookie('github_token', { domain: 'localhost' });
-    res.clearCookie('user_data', { domain: 'localhost' });
+    const domain = process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost';
+    res.clearCookie('auth_token', { domain });
+    res.clearCookie('github_token', { domain });
+    res.clearCookie('user_data', { domain });
     
     // Redirect to signin page
-    res.redirect('http://localhost:3000/auth/signin');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/signin`);
   } catch (error) {
     logger.error('Error during logout:', error);
-    res.redirect('http://localhost:3000/auth/signin?error=logout_failed');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/signin?error=logout_failed`);
   }
 });
 
 // GitHub OAuth entry point
 router.get('/github', (req, res) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
-  const redirectUri = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/auth/github/callback`;
+  const backendUrl = process.env.NODE_ENV === 'production' ? 'https://dev-pulse-api.onrender.com' : 'http://localhost:3001';
+  const redirectUri = `${backendUrl}/api/auth/github/callback`;
   const scope = 'user:email,read:user,repo';
   
   // Force GitHub to show account selection by adding prompt parameter
