@@ -44,10 +44,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(true); // Default to demo mode
   
-  // Conditionally use GitHub data hook only for authenticated users
-  const shouldFetchGitHubData = !isDemo && typeof window !== 'undefined' && localStorage.getItem('devpulse_token');
-  console.log('Dashboard: shouldFetchGitHubData =', shouldFetchGitHubData, 'isDemo =', isDemo);
-  const { repositories, activities, stats: githubStats, loading: githubLoading, error: githubError } = shouldFetchGitHubData ? useGitHubData() : { repositories: [], activities: [], stats: null, loading: false, error: null };
+  // Always call the hook, but conditionally fetch data inside it
+  const { repositories, activities, stats: githubStats, loading: githubLoading, error: githubError } = useGitHubData();
+  
+  console.log('Dashboard: isDemo =', isDemo, 'githubStats =', githubStats);
 
   useEffect(() => {
     console.log('Dashboard: useEffect running - checking authentication');

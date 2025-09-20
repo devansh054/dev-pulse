@@ -46,8 +46,14 @@ export function useGitHubData() {
   const [error, setError] = useState<string | null>(null)
 
   const apiCall = async (endpoint: string, params?: Record<string, string>) => {
-    const token = localStorage.getItem('devpulse_token')
-    console.log('useGitHubData: Retrieved token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null')
+    // Use the actual GitHub token for API calls
+    const githubToken = localStorage.getItem('github_token')
+    const jwtToken = localStorage.getItem('devpulse_token')
+    const token = githubToken || jwtToken
+    
+    console.log('useGitHubData: Retrieved GitHub token from localStorage:', githubToken ? `${githubToken.substring(0, 20)}...` : 'null')
+    console.log('useGitHubData: Retrieved JWT token from localStorage:', jwtToken ? `${jwtToken.substring(0, 20)}...` : 'null')
+    console.log('useGitHubData: Using token:', token ? `${token.substring(0, 20)}...` : 'null')
     
     if (!token) {
       throw new Error('No authentication token found')
@@ -145,6 +151,10 @@ export function useGitHubData() {
         setLoading(false)
         return
       }
+
+      // Use the actual GitHub token, not the JWT
+      const githubToken = localStorage.getItem('github_token') || token
+      console.log('useGitHubData: Using GitHub token:', githubToken ? `${githubToken.substring(0, 20)}...` : 'null')
 
       const username = user.login || user.username || user.githubUsername
       console.log('useGitHubData: Using username:', username)
